@@ -59,7 +59,7 @@ Released under the MIT License
     check: ->
       nav = @$container.find(@options.navSelector)
       if nav.length == 0
-        @_log "No more pages to load"
+        @_done()
       else
         windowBottom = @$context.scrollTop() + @$context.height()
         distance = nav.offset().top - windowBottom
@@ -101,6 +101,12 @@ Released under the MIT License
       @_log "Error loading new page :("
       if typeof @options.error is 'function'
         @$container.find(@options.navSelector).each(@options.error)
+
+    _done: ->
+      @options.state.loading = false
+      @_log "No more pages to load"
+      if typeof @options.done is 'function'
+        @options.done.call()
 
     # Pause firing of events on scroll
     pause: ->
