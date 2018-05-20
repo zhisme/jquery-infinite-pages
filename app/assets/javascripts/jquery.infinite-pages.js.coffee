@@ -39,16 +39,20 @@ Released under the MIT License
 
     # Setup and bind to related events
     init: ->
-
       # Debounce scroll event to improve performance
       scrollTimeout = null
       scrollHandler = (=> @check())
 
-      @$context.scroll ->
-        if scrollTimeout
+      # Use namespace to let us unbind event handler
+      @$context.on 'scroll.infinitePages', ->
+        if scrollTimeout && self.active
           clearTimeout(scrollTimeout)
           scrollTimeout = null
         scrollTimeout = setTimeout(scrollHandler, 250)
+
+     stop: ->
+       @$context.off 'scroll.infinitePages'
+       @_log "Scroll checks stopped"
 
     # Internal helper for logging messages
     _log: (msg) ->
@@ -128,6 +132,12 @@ Released under the MIT License
       if !data
         $this.data 'infinitepages', (data = new InfinitePages(this, option))
       if typeof option == 'string'
-        data[option].apply(data, args)
+         if option == 'destroy'
+           data.stop args
+           # $this.removeData 'infinitepages'
+         else if option == 'reinit'
+           data.init args
+         else
+          data[option].apply(data, args)
 
 ) window.jQuery, window
